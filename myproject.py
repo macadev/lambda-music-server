@@ -71,7 +71,7 @@ def submit_song():
 
         process_song_request.delay(song_url, name, source_type, song_id)
         song_id = song_id + 1
-        return "Your song was queued successfully!"
+        return render_template('success.html', page='success')
     else:
         return "Malformed request."
 
@@ -88,13 +88,13 @@ def process_song_request(song_url, name, source_type, song_id):
         #subprocess.call(['youtube-dl', '--extract-audio', '--audio-format', 'mp3', song_url, '-o', 'song.mp3'])
         subprocess.call(['youtube-dl', '--extract-audio', '--audio-format', 'mp3', song_url])
     else:
-        subprocess.call(['scdl', '-l', song_url])
+        subprocess.call(['scdl', '-l', song_url, '--onlymp3'])
         #subprocess.call(['mv', '*.mp3', 'song.mp3'])
 
     while song_id != current_song_playing.get():
         time.sleep(0.5)
-        print("cuurent song id: ", current_song_playing.get())
-        print("my song id: ", song_id)
+        #print("cuurent song id: ", current_song_playing.get())
+        #print("my song id: ", song_id)
 
     most_recent_file = max(glob.iglob('*.[Mm][Pp4][3Aa]'), key=os.path.getctime)
 
@@ -111,6 +111,34 @@ def process_song_request(song_url, name, source_type, song_id):
     print("current song is now: ", current_song_playing.get())
     #os.remove('song.mp3')
     subprocess.call(['rm', most_recent_file])
+
+@application.route("/success", methods=['POST'])
+def submit_song_success():
+    global song_id
+    # determine whether soundcloud or youtube
+
+    if request.method == 'POST':
+        print("Processing incoming song request")
+        song_url = request.form['song_url']
+        print(song_url)
+        name = request.form['name']
+        print(name)
+
+        source_type = None
+        if 'youtube.com' in song_url:
+            source_type = 'youtube'
+            print('source type is youtube!')
+        elif 'soundcloud.com' in song_url:
+            source_type = 'soundcloud'
+            print('source type is soundcloud!')
+        else:
+            return "Invalid URL. Only Youtube and Soundcloud links allowed!"
+
+        process_song_request.delay(song_url, name, source_type, song_id)
+        song_id = song_id + 1
+        return render_template('success.html', page='success')
+    else:
+        return "Malformed request."
 
 
 if __name__ == "__main__":
