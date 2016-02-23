@@ -75,6 +75,14 @@ def submit_song():
     else:
         return "Malformed request."
 
+@application.route("/next-song")
+def next_song():
+    p = subprocess.Popen(['pgrep', '-f', 'mpg123'], stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    pid, err = p.communicate()
+    pid = pid.rstrip()
+    subprocess.call(['kill', '-9', pid])
+    return render_template('index.html', page='index')
 
 @celery.task
 def add(x,y):
@@ -88,7 +96,7 @@ def process_song_request(song_url, name, source_type, song_id):
         #subprocess.call(['youtube-dl', '--extract-audio', '--audio-format', 'mp3', song_url, '-o', 'song.mp3'])
         subprocess.call(['youtube-dl', '--extract-audio', '--audio-format', 'mp3', song_url])
     else:
-        subprocess.call(['scdl', '-l', song_url])
+        subprocess.call(['scdl', '-l', song_url, '--onlymp3'])
         #subprocess.call(['mv', '*.mp3', 'song.mp3'])
 
     while song_id != current_song_playing.get():
