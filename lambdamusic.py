@@ -6,7 +6,6 @@ import json
 from flask import Flask, request, render_template, flash
 from multiprocessing import Manager, Pool
 from downloader import Downloader
-from player import Player
 
 application = Flask(__name__)
 
@@ -99,4 +98,8 @@ def run_through_queue(_):
 
 if __name__ == "__main__":
     process_pool = Pool()
-    application.run(host='0.0.0.0', debug=True)
+    try:
+        application.run(host='0.0.0.0', debug=True)
+    except KeyboardInterrupt:
+        process_pool.close()
+        process_pool.join()
