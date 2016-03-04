@@ -3,30 +3,18 @@ import subprocess
 import sys
 import json
 
-from flask import Flask, request, render_template, flash, redirect, url_for
-from multiprocessing import Manager
+from flask import Flask, request, render_template, flash
+from multiprocessing import Manager, Pool
 from downloader import Downloader
-from celery import Celery, chain
 from player import Player
 
 application = Flask(__name__)
-
-redis_url = os.environ.get('REDIS_URL')
-if redis_url is None:
-    redis_url = 'redis://localhost:6379/0'
 
 # Set the secret key to enable cookies
 application.secret_key = 'some secret key'
 application.config['SESSION_TYPE'] = 'filesystem'
 
-# Redis and Celery configuration
-application.config['BROKER_URL'] = redis_url
-application.config['CELERY_RESULT_BACKEND'] = redis_url
-
-celery = Celery(application.name, broker=redis_url)
-celery.conf.update(BROKER_URL=redis_url,
-                CELERY_RESULT_BACKEND=redis_url)
-
+process_pool = None
 manager = Manager()
 shared_queue = manager.list()
 playing = manager.Value('i', 0)
@@ -56,10 +44,10 @@ def submit_song():
     if playing.value is 0:
         print('playing is 0!!!')
         playing.value = 1
-        # How do I apply a chain without passing retval down the chain?
-        chain(add_song_to_queue.s(song_url, name, source_type), run_through_queue.s()).apply_async()
+        # How do I apply a callback without passing retval down the chain?
+        process_pool.apply_async(add_song_to_queue, [song_url, name, source_type], callback=run_through_queue)
     else:
-        add_song_to_queue.apply_async([song_url, name, source_type])
+        process_pool.apply_async(add_song_to_queue, [song_url, name, source_type])
 
     print(len(shared_queue))
     flash('Song added successfully!')
@@ -67,13 +55,15 @@ def submit_song():
 
 @application.route("/playlist", methods=['GET', 'POST'])
 def get_playlist():
-    #playlist = []
-    #i = 0
-    #queue_size = len(shared_queue)
-    #while i < queue_size:
-    #    print(shared_queue[i])
-    #    playlist.append(shared_queue[i])
-    return json.dumps(shared_queue[0])
+    global playing
+    playlist = []
+    i = 0
+    queue_size = len(shared_queue)
+    while i < queue_size:
+        print(shared_queue[i])
+        playlist.append(shared_queue[i])
+        i = i + 1
+    return json.dumps(playlist)
 
 @application.route("/next-song")
 def next_song():
@@ -84,7 +74,6 @@ def next_song():
     subprocess.call(['kill', '-9', pid])
     return render_template('index.html', page='index')
 
-@celery.task
 def add_song_to_queue(song_url, submitter_name, source_type):
     if source_type == 'youtube':
         song_info = Downloader.download_youtube_song(song_url, submitter_name)
@@ -93,7 +82,6 @@ def add_song_to_queue(song_url, submitter_name, source_type):
     shared_queue.append(song_info)
     print(len(shared_queue))
 
-@celery.task
 def run_through_queue(_):
     try:
         while True:
@@ -101,15 +89,14 @@ def run_through_queue(_):
             print('Playing song!', song.get('filename'))
             subprocess.call(['mpg123', song.get('filename')])
             # delete the song from queue
-            del shared_queue[0]
             print("Deleting song!")
+            os.remove(song.get('filename'))
+            del shared_queue[0]
     except:
         print("Unexpected error:", sys.exc_info())
         playing.value = 0
         pass
 
 if __name__ == "__main__":
-    #music_player = Player(queue)
-    #player_process = Process(target=run_through_queue)
-    #player_process.start()
+    process_pool = Pool()
     application.run(host='0.0.0.0', debug=True)
