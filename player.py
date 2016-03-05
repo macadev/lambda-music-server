@@ -14,7 +14,10 @@ class Player:
 
     @staticmethod
     def delete_song(song_info):
-        os.remove(song_info['filename'])
+        try:
+            os.remove(song_info['filename'])
+        except FileNotFoundError:
+            print('File does not exist')
 
 
     @staticmethod
