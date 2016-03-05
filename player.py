@@ -11,15 +11,24 @@ class Player:
                 _shared_queue.pop(index)
                 return
 
+
     @staticmethod
     def delete_song(song_info):
         os.remove(song_info['filename'])
 
+
+    @staticmethod
     def play_song(song):
         print('Playing song!', song['filename'])
         subprocess.call(['mpg123', song['filename']])
 
-    def play_next_song(self):
-        pass
+
+    @staticmethod
+    def play_next_song():
+        print('Killing mpg123 process!')
+        p = subprocess.Popen(['pgrep', '-f', 'mpg123'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pid, err = p.communicate()
+        pid = pid.rstrip()
+        subprocess.call(['kill', '-9', pid])
 
 

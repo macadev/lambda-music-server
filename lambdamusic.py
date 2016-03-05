@@ -17,11 +17,14 @@ _process_pool = None
 _manager = Manager()
 _shared_queue = _manager.list()
 _playing = _manager.Value('i', 0)
+_song_playing = _manager.dict()
+
 
 @application.route("/")
 def hello():
     playlist = list(_shared_queue)
     return render_template('index.html', playlist=playlist)
+
 
 @application.route("/submit", methods=['POST'])
 def submit_song():
@@ -49,42 +52,50 @@ def submit_song():
     playlist = list(_shared_queue)
     return render_template('index.html', playlist=playlist)
 
+
 @application.route("/remove-song", methods=['POST'])
 def remove_song():
     if request.headers['Content-Type'] == 'application/json':
         request_json = request.get_json()
         song_id = request_json['song_id']
+
         Player.remove_song_from_queue(song_id, _shared_queue)
+        try:
+            if song_id == _song_playing.get('id'):
+                Player.play_next_song()
+        except:
+            print('No need to cancel playback')
 
+        return json.dumps({'remove_status':'succeeded'})
+    else:
+        return json.dumps({'remove_status':'failed'})
 
-@application.route("/next-song")
-def next_song():
-    p = subprocess.Popen(['pgrep', '-f', 'mpg123'], stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    pid, err = p.communicate()
-    pid = pid.rstrip()
-    subprocess.call(['kill', '-9', pid])
-    return render_template('index.html', page='index')
 
 def add_song_to_queue(song_url, submitter_name, source_type):
     if source_type == 'youtube':
         song_info = Downloader.download_youtube_song(song_url, submitter_name)
     else:
         song_info = Downloader.download_soundcloud_song(song_url, submitter_name)
+
     _shared_queue.append(song_info)
     print(len(_shared_queue))
 
+
 def run_through_queue(_):
+    global _song_playing
     try:
         while True:
             song = _shared_queue[0]
+            _song_playing = song
             Player.play_song(song)
             # delete the song from queue
             Player.remove_song_from_queue(song['id'], _shared_queue)
     except:
         print("Unexpected error:", sys.exc_info())
+        _song_playing = None
         _playing.value = 0
         pass
+
 
 if __name__ == "__main__":
     _process_pool = Pool()

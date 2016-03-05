@@ -16,6 +16,9 @@
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
 
+    <!-- Server communication scripts -->
+    <script src="../static/assets/js/player-scripts.js"></script>
+
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
@@ -107,7 +110,7 @@
                         <td><a href="{{ song['url'] }}">{{ song['title'] }}</a></td>
                         <td>{{ song['submitter_name'] }}</td>
                         <td>{{ song['duration'] }}</td>
-                        <td><button type="button"></button></td>
+                        <td><input class="btn-default" type="button" value="Remove" data-songid="{{ song['id'] }}" onclick="removeSong('{{ song['id'] }}')"></td>
                     </tr>
                 {% endfor %}
                 </tbody>
