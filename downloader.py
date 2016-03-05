@@ -2,6 +2,7 @@ import youtube_dl
 import time
 import requests
 import subprocess
+import uuid
 
 from scdl import soundcloud
 from stdoutcapture import Capturing
@@ -91,6 +92,7 @@ class Downloader:
     @staticmethod
     def __filter_metadata(metadata, source, url, submitter_name):
         song_info_to_keep = {}
+        song_info_to_keep['id'] = str(uuid.uuid4())
         song_info_to_keep['title'] = metadata['title']
         song_info_to_keep['url'] = url
         song_info_to_keep['source'] = source

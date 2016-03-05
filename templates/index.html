@@ -29,7 +29,7 @@
 <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 
 <!-- Custom styles for this template -->
-<link href="../static/cover.css" rel="stylesheet">
+<link href="../static/assets/css/cover.css" rel="stylesheet">
 
 <body>
 
@@ -91,13 +91,14 @@
         <br>
         <h2>Playlist</h2>
         <br>
-        <div>
-            <table class="table">
+        <div class="long_bottom">
+            <table class="table col-md-4">
                 <thead>
                 <tr>
                     <th>Title</th>
                     <th>Submitted by</th>
                     <th>Duration</th>
+                    <th>Remove</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -106,6 +107,7 @@
                         <td><a href="{{ song['url'] }}">{{ song['title'] }}</a></td>
                         <td>{{ song['submitter_name'] }}</td>
                         <td>{{ song['duration'] }}</td>
+                        <td><button type="button"></button></td>
                     </tr>
                 {% endfor %}
                 </tbody>

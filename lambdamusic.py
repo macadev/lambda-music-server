@@ -1,4 +1,3 @@
-import os
 import subprocess
 import sys
 import json
@@ -6,6 +5,7 @@ import json
 from flask import Flask, request, render_template, flash
 from multiprocessing import Manager, Pool
 from downloader import Downloader
+from player import Player
 
 application = Flask(__name__)
 
@@ -26,18 +26,15 @@ def hello():
 @application.route("/submit", methods=['POST'])
 def submit_song():
     global _playing
-    print("Processing incoming song request")
+
     song_url = request.form['song_url']
     print(song_url)
     name = request.form['name']
-    print(name)
 
     if 'youtube.com' in song_url:
         source_type = 'youtube'
-        print('source type is youtube!')
     elif 'soundcloud.com' in song_url:
         source_type = 'soundcloud'
-        print('source type is soundcloud!')
     else:
         return "Invalid URL. Only Youtube and Soundcloud links allowed!"
 
@@ -51,6 +48,14 @@ def submit_song():
     flash('Song added successfully!')
     playlist = list(_shared_queue)
     return render_template('index.html', playlist=playlist)
+
+@application.route("/remove-song", methods=['POST'])
+def remove_song():
+    if request.headers['Content-Type'] == 'application/json':
+        request_json = request.get_json()
+        song_id = request_json['song_id']
+        Player.remove_song_from_queue(song_id, _shared_queue)
+
 
 @application.route("/next-song")
 def next_song():
@@ -73,12 +78,9 @@ def run_through_queue(_):
     try:
         while True:
             song = _shared_queue[0]
-            print('Playing song!', song.get('filename'))
-            subprocess.call(['mpg123', song.get('filename')])
+            Player.play_song(song)
             # delete the song from queue
-            print("Deleting song!")
-            os.remove(song.get('filename'))
-            del _shared_queue[0]
+            Player.remove_song_from_queue(song['id'], _shared_queue)
     except:
         print("Unexpected error:", sys.exc_info())
         _playing.value = 0
