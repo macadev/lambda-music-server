@@ -31,7 +31,6 @@
 <!-- Custom styles for this template -->
 <link href="../static/cover.css" rel="stylesheet">
 
-
 <body>
 
 <div class="site-wrapper">
@@ -43,16 +42,16 @@
             <div class="masthead clearfix">
                 <div class="inner">
                     <h3 class="masthead-brand">Lambda Music Player</h3>
-                    <nav>
-                        <ul class="nav masthead-nav">
-                            <li class="active"><a href="#">Playlist Page</a></li>
-                            <li><a href="#">Team</a></li>
+                    <nav class="navbar-default">
+                        <ul class="nav nav-pills pull-right">
+                            <li><a href="#">Playlist Page</a></li>
+                            <li><a href="#">About</a></li>
                         </ul>
                     </nav>
                 </div>
             </div>
 
-            <div class="inner cover">
+            <div class="inner cover s">
 
                 <div>
                     {% with messages = get_flashed_messages() %}
@@ -88,19 +87,33 @@
 
                 <div class="song_queue">
                 </div>
-
             </div>
-
-            <div class="mastfoot">
-                <!-- <div class="inner">
-                  <p>Cover template for <a href="http://getbootstrap.com">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p>
-                </div> -->
-            </div>
-
+        <br>
+        <h2>Playlist</h2>
+        <br>
+        <div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Submitted by</th>
+                    <th>Duration</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for song in playlist %}
+                    <tr>
+                        <td><a href="{{ song['url'] }}">{{ song['title'] }}</a></td>
+                        <td>{{ song['submitter_name'] }}</td>
+                        <td>{{ song['duration'] }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
 
+        </div>
     </div>
-
 </div>
 
 <!-- Bootstrap core JavaScript

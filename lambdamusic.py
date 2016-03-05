@@ -14,13 +14,14 @@ application.secret_key = 'some secret key'
 application.config['SESSION_TYPE'] = 'filesystem'
 
 _process_pool = None
-manager = Manager()
-_shared_queue = manager.list()
-_playing = manager.Value('i', 0)
+_manager = Manager()
+_shared_queue = _manager.list()
+_playing = _manager.Value('i', 0)
 
 @application.route("/")
 def hello():
-    return render_template('index.html', page='index')
+    playlist = list(_shared_queue)
+    return render_template('index.html', playlist=playlist)
 
 @application.route("/submit", methods=['POST'])
 def submit_song():
@@ -47,21 +48,9 @@ def submit_song():
     else:
         _process_pool.apply_async(add_song_to_queue, [song_url, name, source_type])
 
-    print(len(_shared_queue))
     flash('Song added successfully!')
-    return render_template('index.html')
-
-@application.route("/playlist", methods=['GET', 'POST'])
-def get_playlist():
-    global _playing
-    playlist = []
-    i = 0
-    queue_size = len(_shared_queue)
-    while i < queue_size:
-        print(_shared_queue[i])
-        playlist.append(_shared_queue[i])
-        i = i + 1
-    return json.dumps(playlist)
+    playlist = list(_shared_queue)
+    return render_template('index.html', playlist=playlist)
 
 @application.route("/next-song")
 def next_song():

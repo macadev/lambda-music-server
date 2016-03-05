@@ -96,7 +96,7 @@ class Downloader:
         song_info_to_keep['source'] = source
         song_info_to_keep['submitter_name'] = submitter_name
         if source is 'soundcloud':
-            song_info_to_keep['duration'] = metadata['duration']/1000
+            song_info_to_keep['duration'] = str(int((metadata['duration'] / 1000) / 60)) + ':' + str(int((metadata['duration']/1000)) % 60)
         else:
-            song_info_to_keep['duration'] = metadata['duration']
+            song_info_to_keep['duration'] = str(int(metadata['duration'])) + str(metadata['duration'] % 60)
         return song_info_to_keep
