@@ -23,33 +23,34 @@ _song_playing = _manager.dict()
 @application.route("/")
 def hello():
     playlist = list(_shared_queue)
-    return render_template('index.html', playlist=playlist)
+    return render_template('player.html', playlist=playlist)
 
 
 @application.route("/submit", methods=['POST'])
 def submit_song():
     global _playing
 
-    song_url = request.form['song_url']
-    print(song_url)
+    if request.headers['Content-Type'] == 'application/json':
+        request_json = request.get_json()
+        song_url = request_json['song_url']
+        print(song_url)
 
-    if 'youtube.com' in song_url:
-        source_type = 'youtube'
-    elif 'soundcloud.com' in song_url:
-        source_type = 'soundcloud'
-    else:
-        return "Invalid URL. Only Youtube and Soundcloud links allowed!"
+        if 'youtube.com' in song_url:
+            source_type = 'youtube'
+        elif 'soundcloud.com' in song_url:
+            source_type = 'soundcloud'
+        else:
+            return json.dumps({'submission_status': 'failed'})
 
-    if _playing.value is 0:
-        _playing.value = 1
-        # How do I apply a callback without passing retval down the chain?
-        _process_pool.apply_async(add_song_to_queue, [song_url, source_type], callback=run_through_queue)
-    else:
-        _process_pool.apply_async(add_song_to_queue, [song_url, source_type])
+        if _playing.value is 0:
+            _playing.value = 1
+            # How do I apply a callback without passing retval down the chain?
+            _process_pool.apply_async(add_song_to_queue, [song_url, source_type], callback=run_through_queue)
+        else:
+            _process_pool.apply_async(add_song_to_queue, [song_url, source_type])
 
-    flash('Song added successfully!')
-    playlist = list(_shared_queue)
-    return render_template('index.html', playlist=playlist)
+        return json.dumps({'submission_status': 'succeeded'})
+    return json.dumps({'submission_status': 'failed'})
 
 
 @application.route("/remove-song", methods=['POST'])

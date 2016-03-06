@@ -108,7 +108,7 @@
                     <tr>
                         <td><a href="{{ song['url'] }}">{{ song['title'] }}</a></td>
                         <td>{{ song['duration'] }}</td>
-                        <td><input class="btn-default" type="button" value="Remove" data-songid="{{ song['id'] }}" onclick="removeSong('{{ song['id'] }}')"></td>
+                        <td><input class="btn-default" type="button" value="Remove" data-songid="{{ song['id'] }}"></td>
                     </tr>
                 {% endfor %}
                 </tbody>

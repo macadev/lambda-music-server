@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Lambda Music</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../static/bootstrap-3.3.6-dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../static/assets/css/jumbotron-narrow.css" rel="stylesheet">
+
+    <!-- Dragula CSS -->
+    <link href="../static/dragula/dragula.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="container">
+    <div class="header clearfix">
+        <nav>
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation"><a href="#">About</a></li>
+            </ul>
+        </nav>
+        <h3 class="text-muted">Lambda Music</h3>
+    </div>
+
+    <!-- <div class="jumbotron"> -->
+    <div>
+        <!-- <h1>Lambda Music</h1> -->
+        <h2 class="lead text-center">Search for a song from Soundcloud or Youtube</h2>
+        <input type="text" class="form-control" placeholder="Search" name="srch-term" id="song_to_submit">
+        <!-- <div class="input-group-btn">
+            <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+        </div> -->
+        </br>
+        <div class="col-lg-12">
+            <p class="text-center"><a class="btn btn-md btn-success col-lg-2 col-lg-offset-5" role="button" id="submitSong">Add Song</a></p>
+        </div>
+        <br>
+        <br>
+    </div>
+
+    <br>
+
+
+    <div class="lead text-center">
+        <h3>Your Lambda Playlist</h3>
+    </div>
+
+    <div id="playlist" class="row marketing">
+        {% for song in playlist %}
+            <div class="col-lg-12" id="song">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <h4><a href="{{ song['url'] }}">{{ song['title'] }}</a></h4>
+                    </div>
+                    <div class="col-lg-4">
+                        <h4>{{ song['duration'] }}</h4>
+                    </div>
+                    <div class="col-lg-4">
+                        <p><a id="removeSong" class="btn btn-md btn-warning" role="button" data-songid="{{ song['id'] }}">Remove Song</a></p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2015 Company, Inc.</p>
+    </footer>
+
+</div>
+<!-- /container -->
+
+
+<!-- Dragula for the playlist -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="../static/dragula/dragula.min.js"></script>
+<script src="../static/assets/js/playlist-dragula.js"></script>
+<script src="../static/assets/js/player-scripts.js"></script>
+</body>
+</html>
