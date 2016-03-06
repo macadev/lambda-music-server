@@ -71,6 +71,13 @@ def remove_song():
         return json.dumps({'remove_status':'failed'})
 
 
+@application.route("/refresh-playlist", methods=['GET'])
+def get_playlist():
+    playlist = {'songs' : []}
+    for song in _shared_queue:
+        playlist['songs'].append(song)
+    return json.dumps(playlist)
+
 def add_song_to_queue(song_url, source_type):
     if source_type == 'youtube':
         song_info = Downloader.download_youtube_song(song_url)
