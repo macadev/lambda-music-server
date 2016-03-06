@@ -22,7 +22,6 @@ _song_playing = _manager.dict()
 
 @application.route("/")
 def hello():
-    playlist = list(_shared_queue)
     return render_template('player.html')
 
 

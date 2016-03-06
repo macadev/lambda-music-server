@@ -58,24 +58,6 @@
     </div>
 
     <div id="playlist" class="row marketing">
-        {% for song in playlist %}
-            <div class="col-lg-12" id="song">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <h4><a href="{{ song['url'] }}">{{ song['title'] }}</a></h4>
-                    </div>
-                    <div class="col-lg-4">
-                        <h4>{{ song['duration'] }}</h4>
-                    </div>
-                    <div class="col-lg-4">
-                        <p>
-                            <a id="removeSong" class="btn btn-md btn-warning"
-                               role="button" data-songid="{{ song['id'] }}">Remove Song</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
     </div>
 
     <footer class="footer">
