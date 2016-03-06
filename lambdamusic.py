@@ -23,7 +23,7 @@ _song_playing = _manager.dict()
 @application.route("/")
 def hello():
     playlist = list(_shared_queue)
-    return render_template('player.html', playlist=playlist)
+    return render_template('player.html')
 
 
 @application.route("/submit", methods=['POST'])
@@ -71,12 +71,17 @@ def remove_song():
         return json.dumps({'remove_status':'failed'})
 
 
-@application.route("/refresh-playlist", methods=['GET'])
+@application.route("/refresh-playlist", methods=['POST'])
 def get_playlist():
-    playlist = {'songs' : []}
-    for song in _shared_queue:
-        playlist['songs'].append(song)
-    return json.dumps(playlist)
+    if request.headers['Content-Type'] == 'application/json':
+        client_playlist_song_IDs = request.get_json()
+        new_songs = {'songs' : []}
+        for song in _shared_queue:
+            if client_playlist_song_IDs.get(song['id']) is not 1:
+                new_songs['songs'].append(song)
+        return json.dumps(new_songs)
+    else:
+        return json.dumps({'refresh_status':'failed'})
 
 def add_song_to_queue(song_url, source_type):
     if source_type == 'youtube':
