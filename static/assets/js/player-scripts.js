@@ -46,12 +46,14 @@ $('#submitSong').on('click', function (e) {
     });
 });
 
+var prevNumberOfSongs = 0;
+
 (function playlist_refresher() {
     $.get('/refresh-playlist', function (data) {
         // Now that we've completed the request schedule the next one.
         dataJson = JSON.parse(data);
         var numSongs = dataJson.songs.length;
-        if (numSongs > 0) {
+        if (numSongs > prevNumberOfSongs) {
             refreshedPlaylist = '';
             for (var i = 0; i < numSongs; i++) {
 
@@ -73,7 +75,7 @@ $('#submitSong').on('click', function (e) {
             $('#playlist').empty().append($songs);
             registerRemoveSongListeners();
         }
-
+        prevNumberOfSongs = numSongs;
         setTimeout(playlist_refresher, 4000);
     });
 })();
