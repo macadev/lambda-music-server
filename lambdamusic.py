@@ -32,7 +32,6 @@ def submit_song():
 
     song_url = request.form['song_url']
     print(song_url)
-    name = request.form['name']
 
     if 'youtube.com' in song_url:
         source_type = 'youtube'
@@ -44,9 +43,9 @@ def submit_song():
     if _playing.value is 0:
         _playing.value = 1
         # How do I apply a callback without passing retval down the chain?
-        _process_pool.apply_async(add_song_to_queue, [song_url, name, source_type], callback=run_through_queue)
+        _process_pool.apply_async(add_song_to_queue, [song_url, source_type], callback=run_through_queue)
     else:
-        _process_pool.apply_async(add_song_to_queue, [song_url, name, source_type])
+        _process_pool.apply_async(add_song_to_queue, [song_url, source_type])
 
     flash('Song added successfully!')
     playlist = list(_shared_queue)
@@ -71,11 +70,11 @@ def remove_song():
         return json.dumps({'remove_status':'failed'})
 
 
-def add_song_to_queue(song_url, submitter_name, source_type):
+def add_song_to_queue(song_url, source_type):
     if source_type == 'youtube':
-        song_info = Downloader.download_youtube_song(song_url, submitter_name)
+        song_info = Downloader.download_youtube_song(song_url)
     else:
-        song_info = Downloader.download_soundcloud_song(song_url, submitter_name)
+        song_info = Downloader.download_soundcloud_song(song_url)
 
     _shared_queue.append(song_info)
     print(len(_shared_queue))

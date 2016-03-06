@@ -99,7 +99,6 @@
                 <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Submitted by</th>
                     <th>Duration</th>
                     <th>Remove</th>
                 </tr>
@@ -108,7 +107,6 @@
                 {% for song in playlist %}
                     <tr>
                         <td><a href="{{ song['url'] }}">{{ song['title'] }}</a></td>
-                        <td>{{ song['submitter_name'] }}</td>
                         <td>{{ song['duration'] }}</td>
                         <td><input class="btn-default" type="button" value="Remove" data-songid="{{ song['id'] }}" onclick="removeSong('{{ song['id'] }}')"></td>
                     </tr>

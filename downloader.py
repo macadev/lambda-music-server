@@ -47,7 +47,7 @@ ydl_opts = {
 class Downloader:
 
     @staticmethod
-    def download_youtube_song(song_url, submitter_name):
+    def download_youtube_song(song_url):
         song_info = {}
         filename_indicator = '$$$FILENAME$$$: '
         with Capturing() as output:
@@ -58,45 +58,44 @@ class Downloader:
             if filename_indicator in line:
                 filename = line.split(filename_indicator)[1]
                 filename = filename.split('.')[0] + '.mp3'
-        song_info = Downloader.__filter_metadata(song_info, 'youtube', song_url, submitter_name)
+        song_info = Downloader.__filter_metadata(song_info, 'youtube', song_url)
         song_info['filename'] = filename
         return song_info
 
     @staticmethod
-    def download_soundcloud_song(song_url, submitter_name):
-        song_info = Downloader.__get_soundcloud_song_metadata(song_url, submitter_name)
+    def download_soundcloud_song(song_url):
+        song_info = Downloader.__get_soundcloud_song_metadata(song_url)
         filename_indicator = ' Downloaded.'
         subprocess.call(['scdl', '-l', song_url, '--onlymp3'])
         song_info['filename'] = song_info['title'] + '.mp3'
         return song_info
 
     @staticmethod
-    def __get_soundcloud_song_metadata(song_url, submitter_name):
+    def __get_soundcloud_song_metadata(song_url):
         song_info = {}
         try:
             item_url = url['resolve'].format(song_url)
             item_url = '{0}&client_id={1}'.format(item_url, scdl_client_id)
             r = requests.get(item_url)
             item = r.json()
-            song_info = Downloader.__filter_metadata(item, 'soundcloud', song_url, submitter_name)
+            song_info = Downloader.__filter_metadata(item, 'soundcloud', song_url)
         except Exception:
             time.sleep(5)
             try:
                 r = requests.get(item_url)
                 item = r.json()
-                song_info = Downloader.__filter_metadata(item, 'soundcloud', song_url, submitter_name)
+                song_info = Downloader.__filter_metadata(item, 'soundcloud', song_url)
             except Exception as e:
                 print("Failed to obtain soundcloud song metadata")
         return song_info
 
     @staticmethod
-    def __filter_metadata(metadata, source, url, submitter_name):
+    def __filter_metadata(metadata, source, url):
         song_info_to_keep = {}
         song_info_to_keep['id'] = str(uuid.uuid4())
         song_info_to_keep['title'] = metadata['title']
         song_info_to_keep['url'] = url
         song_info_to_keep['source'] = source
-        song_info_to_keep['submitter_name'] = submitter_name
         if source is 'soundcloud':
             song_info_to_keep['duration'] = str(int((metadata['duration'] / 1000) / 60)) + ':' + str(int((metadata['duration']/1000)) % 60)
         else:
