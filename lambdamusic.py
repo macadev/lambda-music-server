@@ -84,12 +84,11 @@ def get_playlist():
 
 def add_song_to_queue(song_url, source_type):
     if source_type == 'youtube':
-        song_info = Downloader.download_youtube_song(song_url)
+        song_info = Downloader.get_youtube_song_metadata(song_url)
     else:
-        song_info = Downloader.download_soundcloud_song(song_url)
+        song_info = Downloader.get_soundcloud_song_metadata(song_url)
 
     _shared_queue.append(song_info)
-    print(len(_shared_queue))
 
 
 def run_through_queue(_):

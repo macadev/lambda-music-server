@@ -46,28 +46,18 @@ ydl_opts = {
 
 class Downloader:
 
+    # Refactor this bit of shitty code.
     @staticmethod
-    def download_youtube_song(song_url):
+    def get_youtube_song_metadata(song_url):
         song_info = {}
-        filename_indicator = '$$$FILENAME$$$: '
-        with Capturing() as output:
-            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                song_info = ydl.extract_info(song_url, download=True)
-        filename = ''
-        for line in output:
-            if filename_indicator in line:
-                filename = line.split(filename_indicator)[1]
-                filename = filename.split('.')[0] + '.mp3'
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            song_info = ydl.extract_info(song_url, download=False)
         song_info = Downloader.__filter_metadata(song_info, 'youtube', song_url)
-        song_info['filename'] = filename
         return song_info
 
     @staticmethod
-    def download_soundcloud_song(song_url):
+    def get_soundcloud_song_metadata(song_url):
         song_info = Downloader.__get_soundcloud_song_metadata(song_url)
-        filename_indicator = ' Downloaded.'
-        subprocess.call(['scdl', '-l', song_url, '--onlymp3'])
-        song_info['filename'] = song_info['title'] + '.mp3'
         return song_info
 
     @staticmethod
@@ -96,6 +86,7 @@ class Downloader:
         song_info_to_keep['title'] = metadata['title']
         song_info_to_keep['url'] = url
         song_info_to_keep['source'] = source
+        # TODO: Fix issues with duration
         if source is 'soundcloud':
             song_info_to_keep['duration'] = str(int((metadata['duration'] / 1000) / 60)) + ':' + str(int((metadata['duration']/1000)) % 60)
         else:
